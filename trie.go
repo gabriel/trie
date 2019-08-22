@@ -127,24 +127,24 @@ func (t *Trie) Keys() []string {
 		return []string{}
 	}
 
-	return t.PrefixSearch("")
+	return t.PrefixSearch("", 0)
 }
 
 // Performs a fuzzy search against the keys in the trie.
-func (t Trie) FuzzySearch(pre string) []string {
-	keys := fuzzycollect(t.Root(), []rune(pre))
+func (t Trie) FuzzySearch(pre string, limit int) []string {
+	keys := fuzzycollect(t.Root(), []rune(pre), limit)
 	sort.Sort(ByKeys(keys))
 	return keys
 }
 
 // Performs a prefix search against the keys in the trie.
-func (t Trie) PrefixSearch(pre string) []string {
+func (t Trie) PrefixSearch(pre string, limit int) []string {
 	node := findNode(t.Root(), []rune(pre))
 	if node == nil {
 		return nil
 	}
 
-	return collect(node)
+	return collect(node, limit)
 }
 
 // Creates and returns a pointer to a new child for the node.
@@ -240,7 +240,7 @@ func maskruneslice(rs []rune) uint64 {
 	return m
 }
 
-func collect(node *Node) []string {
+func collect(node *Node, limit int) []string {
 	var (
 		n *Node
 		i int
@@ -248,6 +248,7 @@ func collect(node *Node) []string {
 	keys := make([]string, 0, node.termCount)
 	nodes := make([]*Node, 1, len(node.children))
 	nodes[0] = node
+	count := 0
 	for l := len(nodes); l != 0; l = len(nodes) {
 		i = l - 1
 		n = nodes[i]
@@ -258,6 +259,10 @@ func collect(node *Node) []string {
 		if n.term {
 			word := n.path
 			keys = append(keys, word)
+			count++
+			if limit != 0 && count >= limit {
+				break
+			}
 		}
 	}
 	return keys
@@ -268,9 +273,9 @@ type potentialSubtree struct {
 	node *Node
 }
 
-func fuzzycollect(node *Node, partial []rune) []string {
+func fuzzycollect(node *Node, partial []rune, limit int) []string {
 	if len(partial) == 0 {
-		return collect(node)
+		return collect(node, limit)
 	}
 
 	var (
@@ -293,7 +298,7 @@ func fuzzycollect(node *Node, partial []rune) []string {
 		if p.node.val == partial[p.idx] {
 			p.idx++
 			if p.idx == len(partial) {
-				keys = append(keys, collect(p.node)...)
+				keys = append(keys, collect(p.node, limit)...)
 				continue
 			}
 		}

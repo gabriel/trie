@@ -116,7 +116,7 @@ func TestRemove(t *testing.T) {
 		}
 	}
 
-	keys = trie.FuzzySearch("foo")
+	keys = trie.FuzzySearch("foo", 0)
 	if len(keys) != 2 {
 		t.Errorf("Expected 2 keys got %d", len(keys))
 	}
@@ -196,7 +196,7 @@ func TestPrefixSearch(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		actual := trie.PrefixSearch(test.pre)
+		actual := trie.PrefixSearch(test.pre, 0)
 		sort.Strings(actual)
 		sort.Strings(test.expected)
 		if len(actual) != test.length {
@@ -210,7 +210,7 @@ func TestPrefixSearch(t *testing.T) {
 		}
 	}
 
-	trie.PrefixSearch("fsfsdfasdf")
+	trie.PrefixSearch("fsfsdfasdf", 0)
 }
 
 func TestFuzzySearch(t *testing.T) {
@@ -249,7 +249,7 @@ func TestFuzzySearch(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.partial, func(t *testing.T) {
-			actual := trie.FuzzySearch(test.partial)
+			actual := trie.FuzzySearch(test.partial, 0)
 			if len(actual) != test.length {
 				t.Errorf("Expected len(actual) to == %d, was %d for %s actual was %#v",
 					test.length, len(actual), test.partial, actual)
@@ -275,7 +275,7 @@ func TestFuzzySearchSorting(t *testing.T) {
 		trie.Add(key, nil)
 	}
 
-	actual := trie.FuzzySearch("fz")
+	actual := trie.FuzzySearch("fz", 0)
 	expected := []string{"bfrza", "foo/bart/baz.go"}
 
 	if len(actual) != len(expected) {
@@ -309,7 +309,7 @@ func BenchmarkPrefixSearch(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_ = trie.PrefixSearch("fo")
+		_ = trie.PrefixSearch("fo", 0)
 	}
 }
 
@@ -319,7 +319,7 @@ func BenchmarkFuzzySearch(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_ = trie.FuzzySearch("fs")
+		_ = trie.FuzzySearch("fs", 0)
 	}
 }
 
@@ -349,7 +349,7 @@ func TestSupportChinese(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		actual := trie.PrefixSearch(test.pre)
+		actual := trie.PrefixSearch(test.pre, 0)
 		sort.Strings(actual)
 		sort.Strings(test.expected)
 		if len(actual) != test.length {
