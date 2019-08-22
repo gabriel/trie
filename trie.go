@@ -241,6 +241,9 @@ func maskruneslice(rs []rune) uint64 {
 }
 
 func collect(node *Node, limit int) []string {
+	if len(node.children) == 0 {
+		return []string{}
+	}
 	var (
 		n *Node
 		i int
